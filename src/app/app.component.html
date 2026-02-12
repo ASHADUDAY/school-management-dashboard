@@ -1,0 +1,4 @@
+<navbar-primary-nav *ngIf="userLoggedIn"></navbar-primary-nav>
+<ng-container *ngIf="!userLoggedIn">
+    <router-outlet></router-outlet>
+</ng-container>
