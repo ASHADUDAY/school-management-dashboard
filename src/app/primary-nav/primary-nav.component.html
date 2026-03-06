@@ -1,92 +1,98 @@
 <div class="main-header shared_header">
-  <div class="sidebar">
+  <div class="sidebar" [ngClass]="{ openSidebar: !sidebarOpen }">
     <!-- <mat-icon class="close-icon cursor"(click)="openNav()">backspace</mat-icon> -->
 
     <div class="sidenav-item">
       <div class="logo-container">
         <div class="logo">
-          <img
-            src="/assets/images/shikshamitra-logo.PNG"
-            alt=""
-            style="width: 100%; height: 100%"
-          />
+          <img src="/assets/images/shikshamitra-logo.PNG" alt="" />
         </div>
       </div>
-      <ul>
-        <li
-          *ngFor="let item of navItems; let i = index"
-          [ngClass]="{ 'open-card': item.openCardFlag == true }"
-        >
-          <div>
-            <div
-              *ngIf="item.children && item.children.length > 0"
-              style="width: 256px; height: 56px"
-            >
+      <div class="menulist">
+        <ul style="margin: 0px">
+          <li *ngFor="let item of navItems; let i = index">
+            <div>
               <div
-                color="primary"
-                [ngClass]="{
-                  'selected-btn': btnSelected,
-                  'unSelected-btn': !btnSelected,
-                }"
-                style="justify-content: space-around"
-                (click)="openCard($event, i)"
+                style="place-items: center"
+                *ngIf="item.hasChild && item.children.length > 0"
               >
                 <div
-                  style="display: flex"
-                  [routerLink]="item.route"
-                  (click)="selectPrefiler($event)"
+                  color="primary"
+                  [ngClass]="{
+                    'selected-btn':
+                      item.openCardFlag && this.subMenuSelected(i),
+                    'unSelected-btn':
+                      !item.openCardFlag ||
+                      (item.openCardFlag && !this.subMenuSelected(i)),
+                  }"
+                  style="cursor: pointer"
                 >
-                  <mat-icon
-                    [svgIcon]="item.iconName"
-                    style="display: flex"
-                  ></mat-icon>
-                  <span style="margin-left: 0.75rem">
-                    {{
-                      lang == "spanish" ? item.displayEsName : item.displayName
-                    }}
-                  </span>
+                  <div
+                    style="
+                      display: flex;
+                      align-items: center;
+                      margin-left: 1vw;
+                      margin-right: 1vw;
+                    "
+                    (click)="openCard($event, i)"
+                  >
+                    <img
+                      style="height: 25px; width: 25px"
+                      [src]="'../assets/images/icon/' + item.icon + '.png'"
+                      alt="{{ item.icon }}"
+                    />
+                    <span style="margin-left: 0.75rem">
+                      {{ item.label }}
+                    </span>
+                  </div>
+                  <mat-icon class="right-icon" (click)="openCard($event, i)">{{
+                    item.openCardFlag ? "expand_less" : "expand_more"
+                  }}</mat-icon>
                 </div>
-                <mat-icon class="right-icon m-l-2">{{
-                  item.openCardFlag == true ? "expand_less" : "expand_more"
-                }}</mat-icon>
+                <app-child-item
+                  #menu
+                  [items]="item.children"
+                  [lang]="lang"
+                  [btnSelected]="btnSelected"
+                  [ngClass]="{
+                    displayBlock: item.openCardFlag,
+                    displayNone: !item.openCardFlag,
+                  }"
+                  (selectedBtn)="handleSelectedBtn($event)"
+                ></app-child-item>
               </div>
-              <app-child-item
-                #menu
-                [items]="item.children"
-                [lang]="lang"
-                [btnSelected]="btnSelected"
-                class="childMenu"
-                (selectedBtn)="handleSelectedBtn($event)"
-              ></app-child-item>
-            </div>
-            <div
-              *ngIf="!item.children || item.children.length === 0"
-              style="width: 256px; height: 56px"
-            >
-              <div
-                color="primary"
-                class="selected-btn"
-                (click)="openCard($event, i)"
-              >
-                <div style="display: flex">
-                  <mat-icon
-                    [svgIcon]="item.iconName"
-                    style="display: flex"
-                  ></mat-icon>
-                  <span style="margin-left: 0.75rem">
-                    {{
-                      lang == "spanish" ? item.displayEsName : item.displayName
-                    }}
-                  </span>
+              <div *ngIf="!item.hasChild" style="place-items: center">
+                <div
+                  [ngClass]="{
+                    'selected-btn': item.openCardFlag,
+                    'unSelected-btn': !item.openCardFlag,
+                  }"
+                  style="cursor: pointer"
+                  (click)="openCard($event, i)"
+                >
+                  <div
+                    style="
+                      display: flex;
+                      align-items: center;
+                      margin-left: 1vw;
+                      margin-right: 1vw;
+                    "
+                  >
+                    <img
+                      style="height: 25px; width: 25px"
+                      [src]="'../assets/images/icon/' + item.icon + '.png'"
+                      alt="{{ item.icon }}"
+                    />
+                    <span style="margin-left: 0.75rem">
+                      {{ item.label }}
+                    </span>
+                  </div>
                 </div>
-                <mat-icon class="right-icon m-r-1">{{
-                  item.openCardFlag == true ? "expand_less" : "expand_more"
-                }}</mat-icon>
               </div>
             </div>
-          </div>
-        </li>
-      </ul>
+          </li>
+        </ul>
+      </div>
     </div>
   </div>
 
@@ -110,10 +116,6 @@
           </div>
           <div class="menu">
             <ul>
-              <!-- <li><a href="#"><i class="ph-bold ph-user"></i>&nbsp;Profile</a></li>
-            <li><a href="#"><i class="ph-bold ph-envelope-simple"></i>&nbsp;Inbox</a></li>
-            <li><a href="#"><i class="ph-bold ph-gear-six"></i>&nbsp;Settings</a></li>
-            <li><a href="#"><i class="ph-bold ph-question"></i>&nbsp;Help</a></li> -->
               <li>
                 <a type="button" (click)="logout()"
                   ><i class="ph-bold ph-sign-out"></i>&nbsp;Sign Out</a

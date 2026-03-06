@@ -1,28 +1,4 @@
-<!-- <div class="Container">
-  <div class="row">
-    <div class="col-md-3">
-      <mat-menu #childMenu="matMenu" [overlapTrigger]="false">
-        <span *ngFor="let child of items">
-          <span *ngIf="child.children && child.children.length > 0">
-            <button mat-menu-item color="primary" [matMenuTriggerFor]="menu.childMenu">
-              <mat-icon>{{child.iconName}}</mat-icon>
-              <span>{{child.displayName}}</span>
-            </button>
-            <app-child-item #menu [items]="child.children"></app-child-item>
-          </span>
-          <span *ngIf="!child.children || child.children.length === 0">
-            <button mat-menu-item [routerLink]="child.route">
-              <mat-icon>{{child.iconName}}</mat-icon>
-              <span>{{child.displayName}}</span>
-            </button>
-          </span>
-        </span>
-      </mat-menu>
-    </div>
-  </div>
-</div> -->
-
-<div class="child_shared_item">
+<div class="child_shared_item" style="display: flex; align-items: center">
   <div *ngFor="let child of items; let i = index">
     <!-- Handle branch node menu items -->
 
@@ -53,36 +29,54 @@
     <div
       *ngIf="!child.children || child.children.length == 0"
       class="childElem p--5"
-      [routerLink]="child.route"
       (click)="emitSelected(i)"
-      style="
-        border-bottom: 3px solid black;
-        margin-left: 2rem;
-        margin-right: 2rem;
-      "
     >
-      <div
+      <!-- [routerLink]="child.route" -->
+      <button
+        mat-button
+        [ngClass]="{
+          'selected-btn': selectedSubmenuIndex === i,
+          'unSelected-btn': selectedSubmenuIndex !== i,
+        }"
+        class="menu-icon"
+        style="
+          width: 2vw;
+          display: flex;
+          align-items: center;
+          justify-content: space-evenly;
+        "
+        matTooltip="{{ child?.label || 'no-label' }}"
+        matTooltipPosition="above"
+        matTooltipShowDelay="0"
+      >
+        <img
+          [src]="'/assets/images/icon/' + child.icon + '.svg'"
+          alt="icon"
+          style="height: 25px; width: 25px; display: flex"
+        />
+      </button>
+      >
+      <!-- <div
         color="primary"
         [ngClass]="{
           'selected-btn': selectedSubmenuIndex === i,
-          'unSelected-btn': selectedSubmenuIndex !== i
+          'unSelected-btn': selectedSubmenuIndex !== i,
         }"
-        style="width: 125px"
+        class="menu-icon"
+        style="
+          width: 2vw;
+          display: flex;
+          align-items: center;
+          justify-content: space-evenly;
+        "
+        matTooltip="{{ child?.label ?? '' }}"
       >
-        <!-- <mat-icon
-          [svgIcon]="child.iconName"
-          style="display: flex; margin-right: 0.5rem"
-        ></mat-icon> -->
-        <!-- <mat-icon class="right-icon">{{child.iconName}}</mat-icon> -->
         <img
-          [src]="'/assets/images/' + child.iconName + '.svg'"
+          [src]="'/assets/images/icon/' + child.icon + '.svg'"
           alt="icon"
-          style="display: flex; margin-right: 0.5rem"
+          style="height: 25px; width: 25px; display: flex"
         />
-        <span>{{
-          lang == "spanish" ? child.displayEsName : child.displayName
-        }}</span>
-      </div>
+      </div> -->
     </div>
   </div>
 </div>

@@ -2,8 +2,8 @@ import { Component, OnInit } from "@angular/core";
 import { Event, NavigationStart, Router } from "@angular/router";
 import { TranslateService } from "@ngx-translate/core";
 import { UserAuthService } from "../service/userAuth.service";
-import { MatIconRegistry } from "@angular/material/icon";
-import { DomSanitizer } from "@angular/platform-browser";
+import { MENU_STEPPER_CONFIG } from "../config/stepper.config";
+
 @Component({
   selector: "navbar-primary-nav",
   templateUrl: "./primary-nav.component.html",
@@ -11,23 +11,15 @@ import { DomSanitizer } from "@angular/platform-browser";
 })
 export class PrimaryNavComponent implements OnInit {
   constructor(
-    private matIconRegistry: MatIconRegistry,
-    private domSanitizer: DomSanitizer,
     public translate: TranslateService,
     public router: Router,
-    public authService: UserAuthService
+    public authService: UserAuthService,
   ) {
-    this.matIconRegistry.addSvgIcon(
-      "export",
-      this.domSanitizer.bypassSecurityTrustResourceUrl(
-        "../assets/images/export.svg"
-      )
-    );
     translate.addLangs(["english", "spanish"]);
     translate.setDefaultLang("english");
     const browserLang = localStorage.getItem("lang") || "english";
     translate.use(
-      browserLang.match(/english|spanish/) ? browserLang : "english"
+      browserLang.match(/english|spanish/) ? browserLang : "english",
     );
     this.router.events.subscribe((event: Event) => {
       if (event instanceof NavigationStart) {
@@ -41,64 +33,16 @@ export class PrimaryNavComponent implements OnInit {
   }
   lang = "english";
   showDashboard: boolean = false;
-  btnSelected: boolean = true;
+  btnSelected: boolean = false;
+  selectedMenu: String = "dashboard";
   sidebarOpen: boolean = false;
-  navItems: any[] = [
-    {
-      displayName: "Prefiler",
-      displayEsName: "Prefiler",
-      iconName: "export",
-      openCardFlag: 0,
-      route: "dashboard",
-      // route: 'prefiler-ui/dashboard',
-      children: [
-        {
-          displayName: "AMS",
-          displayEsName: "prefiler-ui",
-          iconName: "prefiler_items",
-          route: "/ams/filer-details",
-        },
-        {
-          displayName: "AFR",
-          displayEsName: "prefiler-ui",
-          iconName: "prefiler_items",
-          route: "/afr-prefiler/filer-details",
-        },
-        {
-          displayName: "AES",
-          displayEsName: "prefiler-ui",
-          iconName: "prefiler_items",
-          route: "/aes/filer-details",
-        },
-        {
-          displayName: "ACI",
-          displayEsName: "prefiler-ui",
-          iconName: "prefiler_items",
-          route: "/aci-prefiler/filer-details",
-        },
-        {
-          displayName: "ICS2",
-          displayEsName: "ics2",
-          iconName: "prefiler_items",
-          route: "/pre-ics2/filer-details",
-        },
-        {
-          displayName: "ICS",
-          displayEsName: "ics",
-          iconName: "prefiler_items",
-          route: "/ics/filer-details",
-        },
-      ],
-    },
-  ];
+  navItems: any[] = MENU_STEPPER_CONFIG;
 
   officeList = [] as any;
   office;
   // office :any;
   ngOnInit() {
-    // if(!localStorage.getItem('DepFlag')){
-    //   localStorage.setItem('DepFlag', 'E');
-    // }
+    this.openCard(event, 0);
     this.lang = localStorage.getItem("lang");
     let profile = document.querySelector(".profile");
     let menu = document.querySelector(".menu");
@@ -146,31 +90,51 @@ export class PrimaryNavComponent implements OnInit {
     }
     location.reload();
   }
+
   openCard(e, index) {
-    console.log(e);
-    console.log(index);
-    // console.log(this.navItems[index].openCardFlag);
-    console.log("openCard primary-nav btnSelected before", this.btnSelected);
-    this.navItems[index].openCardFlag = this.navItems[index].openCardFlag
-      ? false
-      : true;
-    this.btnSelected = index !== null ? true : false;
-    console.log("openCard primary-nav btnSelected after", this.btnSelected);
-    console.log(this.navItems[index].openCardFlag);
+    console.log(this.navItems[index]);
+    if (index && this.navItems[index].hasChild) {
+      console.log(this.navItems[index].openCardFlag, "openCardFlag before");
+
+      if (this.selectedMenu === this.navItems[index].key) {
+        console.log(this.selectedMenu, "selectedMenu");
+
+        this.navItems[index].openCardFlag = !this.navItems[index].openCardFlag;
+      } else {
+        this.unSelectButton();
+        this.navItems[index].openCardFlag = true;
+        this.selectedMenu = this.navItems[index].key;
+      }
+      console.log(this.navItems[index].openCardFlag, "openCardFlag after");
+    } else {
+      this.unSelectButton();
+      this.navItems[index].openCardFlag = true;
+      this.selectedMenu = this.navItems[index].key;
+    }
   }
 
-  selectPrefiler(event) {
-    console.log(event);
-    console.log("before", this.btnSelected);
-    this.btnSelected = true;
-    console.log("after", this.btnSelected);
+  unSelectButton() {
+    this.navItems.forEach((item) => {
+      item.openCardFlag = false;
+    });
+  }
+
+  subMenuSelected(index: number): boolean {
+    console.log(index);
+
+    let subMenuSelected = false;
+    this.navItems[index].children.forEach((child) => {
+      if (child.openCardFlag) {
+        subMenuSelected = true;
+      }
+    });
+    return subMenuSelected;
   }
 
   openNav() {
     let v = document.querySelector(".main-header");
     v.classList.toggle("openSidebar");
     this.sidebarOpen = !this.sidebarOpen;
-    this.btnSelected = true;
     console.log("open sidebaropen", this.sidebarOpen);
     this.dispatchEventToMFE(this.sidebarOpen);
   }
@@ -184,25 +148,25 @@ export class PrimaryNavComponent implements OnInit {
     console.log("event", event);
     window.dispatchEvent(event);
   }
-  closeNav() {
-    document.getElementById("mySidebar").style.width = "0";
-    document.getElementById("main").style.marginLeft = "0";
-    // this.sidebarOpen = false;
-    // console.log("closed sidebaropen", this.sidebarOpen);
-    // this.dispatchEventToMFE(this.sidebarOpen);
-  }
+  // closeNav() {
+  //   document.getElementById("mySidebar").style.width = "0";
+  //   document.getElementById("main").style.marginLeft = "0";
+  //   // this.sidebarOpen = false;
+  //   // console.log("closed sidebaropen", this.sidebarOpen);
+  //   // this.dispatchEventToMFE(this.sidebarOpen);
+  // }
   addLocale(e) {
-    console.log(e);
-    localStorage.setItem("lang", e);
-    this.lang = e;
-    this.authService.getLang(this.lang);
-    location.reload();
+    // console.log(e);
+    // localStorage.setItem("lang", e);
+    // this.lang = e;
+    // this.authService.getLang(this.lang);
+    // location.reload();
   }
   logout() {
-    localStorage.removeItem("JWToken");
-    localStorage.removeItem("session");
-    localStorage.removeItem("lang");
-    this.router.navigateByUrl("/login");
+    // localStorage.removeItem("JWToken");
+    // localStorage.removeItem("session");
+    // localStorage.removeItem("lang");
+    // this.router.navigateByUrl("/login");
   }
 
   handleSelectedBtn(status: boolean) {

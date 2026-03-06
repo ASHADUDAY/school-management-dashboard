@@ -1,0 +1,12 @@
+.menu-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.mat-tooltip {
+  z-index: 10000;
+}
